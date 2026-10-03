@@ -55,8 +55,12 @@ public class LibraryService {
      * @param title title of the book being issued
      * @return copies left after the issue
      * @throws BookUnavailableException if availableCopies is 0
+     * @throws IllegalArgumentException if title is null or blank
      */
     public static int issueBook(int availableCopies, String title) throws BookUnavailableException {
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("Book title must not be empty.");
+        }
         if (availableCopies <= 0) {
             throw new BookUnavailableException("'" + title + "' has no copies available.");
         }
