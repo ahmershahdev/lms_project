@@ -49,7 +49,7 @@ public class LibraryService {
     }
 
     /**
-     * Returns the copy count after issuing one copy of title.
+     * Issue a single copy; throws BookUnavailableException if none left.
      *
      * @param availableCopies copies currently on the shelf
      * @param title title of the book being issued
