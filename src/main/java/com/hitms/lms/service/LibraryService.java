@@ -1,6 +1,7 @@
 package com.hitms.lms.service;
 
 import com.hitms.lms.exception.BookUnavailableException;
+import com.hitms.lms.exception.MemberNotFoundException;
 import com.hitms.lms.model.Book;
 import com.hitms.lms.model.Member;
 import java.util.HashMap;
@@ -33,6 +34,21 @@ public class LibraryService {
     }
 
     /**
+     * Looks up a member by ID.
+     *
+     * @param memberId the ID to search for
+     * @return the matching member
+     * @throws MemberNotFoundException if no member has that ID
+     */
+    public Member findMemberById(String memberId) throws MemberNotFoundException {
+        Member member = members.get(memberId);
+        if (member == null) {
+            throw new MemberNotFoundException("No member found with ID " + memberId + ".");
+        }
+        return member;
+    }
+
+    /**
      * Returns the copy count after issuing one copy of title.
      *
      * @param availableCopies copies currently on the shelf
@@ -52,13 +68,19 @@ public class LibraryService {
      *
      * @param memberId the borrowing member
      * @param isbn the ISBN of the book
+     * @throws MemberNotFoundException if the member does not exist
      * @throws BookUnavailableException if the book has no copies left
      */
-    public void issueBook(String memberId, String isbn) throws BookUnavailableException {
-        Member member = members.get(memberId);
+    public void issueBook(String memberId, String isbn)
+            throws MemberNotFoundException, BookUnavailableException {
+        Member member = findMemberById(memberId);
         Book book = books.get(isbn);
         if (book == null) {
             throw new BookUnavailableException("No book with ISBN " + isbn + " in the catalogue.");
+        }
+        if (!member.canBorrow()) {
+            throw new BookUnavailableException(member.getFullName()
+                    + " has reached the limit of " + Member.MAX_BORROW_LIMIT + " books.");
         }
         book.setAvailableCopies(issueBook(book.getAvailableCopies(), book.getTitle()));
         member.incrementBorrowed();
@@ -69,9 +91,10 @@ public class LibraryService {
      *
      * @param memberId the returning member
      * @param isbn the ISBN of the book
+     * @throws MemberNotFoundException if the member does not exist
      */
-    public void returnBook(String memberId, String isbn) {
-        Member member = members.get(memberId);
+    public void returnBook(String memberId, String isbn) throws MemberNotFoundException {
+        Member member = findMemberById(memberId);
         Book book = books.get(isbn);
         if (book != null && member.getBorrowedCount() > 0) {
             book.setAvailableCopies(book.getAvailableCopies() + 1);

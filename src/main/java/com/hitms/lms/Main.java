@@ -1,6 +1,7 @@
 package com.hitms.lms;
 
 import com.hitms.lms.exception.BookUnavailableException;
+import com.hitms.lms.exception.MemberNotFoundException;
 import com.hitms.lms.model.Book;
 import com.hitms.lms.model.Member;
 import com.hitms.lms.service.LibraryService;
@@ -32,11 +33,15 @@ public class Main {
             service.issueBook("M-065", "978-0132350884");
             System.out.println("Issued:   " + service.getBook("978-0132350884"));
             service.issueBook("M-065", "978-0132350884");
-        } catch (BookUnavailableException e) {
+        } catch (BookUnavailableException | MemberNotFoundException e) {
             System.out.println("Error:    " + e.getMessage());
         }
 
-        service.returnBook("M-065", "978-0132350884");
-        System.out.println("Returned: " + service.getBook("978-0132350884"));
+        try {
+            service.returnBook("M-065", "978-0132350884");
+            System.out.println("Returned: " + service.getBook("978-0132350884"));
+        } catch (MemberNotFoundException e) {
+            System.out.println("Error:    " + e.getMessage());
+        }
     }
 }
